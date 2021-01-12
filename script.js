@@ -2,6 +2,7 @@
 Source: Head First JavaScript Programming by Eric Freeman;   
 Aleksandr Momziakov */
 
+
 // объект view отображает статус попадания/промаха по кораблю пользователем 
     const view = {
         displayMessage: function(msg) {   //метод получает строковое сообщение и выводит его
@@ -24,9 +25,50 @@ Aleksandr Momziakov */
         numShips: 3,  //количество кораблей
         shipLength: 3, //количество клеток, занимаемое одним кораблем
         shipsSunk: 0, //количество попаданий
-        ships: [{ locations: ["06", "16", "26"], hits: ["", "", ""] }, //местоположение кораблей, массив , указывающий координаты выстрелов от пользователя
-                { locations: ["24", "34", "44"], hits: ["", "", ""] },
-                { locations: ["10", "11", "12"], hits: ["", "", ""] }], 
+        //метод generateShipLocations, генерирующий местоположение кораблей
+        generateShipLocations: function() {
+            let locations;
+            for (let i = 0; i < this.numShips; i++) {
+                do {
+                    locations = this.generateShip();
+                } while (this.collision(locations));
+                this.ships[i].locations = locations;
+            }
+        },
+        generateShip: function() {
+            const direction = Math.floor(Math.random() * 2);
+                let row, col;
+                if (direction === 1) {
+                    row = Math.floor(Math.random() * this.boardSize);
+                    col = Math.floor(Math.random() * (this.boardSize - this.shipLength));
+                } else {
+                    row = Math.floor(Math.random() * (this.boardSize - this.shipLength));
+                    col = Math.floor(Math.random() * this.boardSize);
+                }
+                const newShipLocations = [];
+                for (let i = 0; i < this.shipLength; i++) {
+                    if (direction === 1) {
+                        newShipLocations.push(row + "" + (col + i));
+                } else {
+                        newShipLocations.push((row + i) + "" + col);
+                        }
+                }
+                return newShipLocations;
+           },
+        collision: function(locations) {
+            for (let i = 0; i < this.numShips; i++) {
+                let ship = model.ships[i];
+                    for (let j = 0; j < locations.length; j++) {
+                        if (ship.locations.indexOf(locations[j]) >= 0) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+           },
+        ships: [{ locations: [0, 0, 0], hits: ["", "", ""] }, //местоположение кораблей, массив , указывающий координаты выстрелов от пользователя
+                { locations: [0, 0, 0], hits: ["", "", ""] },
+                { locations: [0, 0, 0], hits: ["", "", ""] }], 
         //метод fire записывает координаты, вводимые пользователем, сверяет с координатами корабля на поле
         fire: function(guess) {
             for (let i = 0; i < this.numShips; i++) {
@@ -109,7 +151,9 @@ controller.processGuess("C6");  */
         fireButton.onclick = handleFireButton;
         const guessInput = document.getElementById("validationDefault01");
         guessInput.onkeypress = handleKeyPress;
+        
     }
+    model.generateShipLocations();
 
    function handleFireButton() {
         const guessInput = document.getElementById("validationDefault01");
